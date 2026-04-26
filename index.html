@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Will You Be Mine? 💕</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #fbeaf0, #fad0c4, #e1f5ee);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Floating hearts background */
+.floating-hearts {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+.fh {
+  position: absolute;
+  bottom: -40px;
+  animation: floatUp linear infinite;
+  opacity: 0.3;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+  100% { transform: translateY(-110vh) rotate(25deg); opacity: 0; }
+}
+
+/* Card */
+.card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(212, 83, 126, 0.2);
+  padding: 2.5rem 2rem 2rem;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  position: relative;
+  z-index: 2;
+}
+
+.mood-icon {
+  font-size: 56px;
+  display: block;
+  margin-bottom: 0.75rem;
+  transition: transform 0.3s;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: bold;
+  color: #c2185b;
+  margin-bottom: 0.4rem;
+  min-height: 32px;
+}
+
+.tagline {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 1.75rem;
+  min-height: 20px;
+  font-style: italic;
+}
+
+/* Buttons */
+.btn-area {
+  position: relative;
+  min-height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+}
+
+.btn-yes {
+  padding: 12px 36px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #e91e63;
+  color: white;
+  transition: transform 0.15s;
+}
+.btn-yes:hover { transform: scale(1.06); }
+.btn-yes:active { transform: scale(0.98); }
+
+.btn-no {
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: bold;
+  border: 2px solid #e91e63;
+  border-radius: 12px;
+  cursor: pointer;
+  background: white;
+  color: #e91e63;
+  position: relative;
+  transition: transform 0.25s ease, font-size 0.3s, padding 0.3s;
+}
+
+/* Result message */
+.result-box {
+  margin-top: 1.25rem;
+  min-height: 24px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #e91e63;
+  animation: fadeSlide 0.4s ease;
+  line-height: 1.5;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Progress bar */
+.progress-bar {
+  margin-top: 1.25rem;
+  height: 6px;
+  background: #fce4ec;
+  border-radius: 6px;
+  overflow: hidden;
+  display: none;
+}
+.progress-fill {
+  height: 100%;
+  background: #e91e63;
+  border-radius: 6px;
+  transition: width 0.4s ease, background 0.4s;
+}
+
+/* Stars */
+.stars {
+  margin-top: 0.75rem;
+  display: none;
+  justify-content: center;
+  gap: 4px;
+}
+.star { width: 18px; height: 18px; }
+
+/* Confetti */
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: confettiFall 1.2s ease forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(130px) rotate(360deg); }
+}
+</style>
+</head>
+<body>
+
+<div class="floating-hearts" id="floatingHearts"></div>
+
+<div class="card" id="card">
+  <span class="mood-icon" id="moodIcon">🥺</span>
+  <div class="title" id="titleText">Will you be mine?</div>
+  <div class="tagline" id="tagline">Choose wisely, my heart is fragile...</div>
+
+  <div class="btn-area" id="btnArea">
+    <button class="btn-yes" id="yesBtn" onclick="handleYes()">Yes, always 💕</button>
+    <button class="btn-no"  id="noBtn"  onclick="handleNo()">No</button>
+  </div>
+
+  <div class="result-box" id="resultBox"></div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="stars" id="starsRow"></div>
+</div>
+
+<script>
+const stages = [
+  { title: "Will you be mine?",          tagline: "Choose wisely, my heart is fragile...",         icon: "🥺", noText: "No",             noMsg: "No?! The audacity... 😤" },
+  { title: "Are you absolutely sure?",   tagline: "Think of the butterflies. THE BUTTERFLIES.",    icon: "😢", noText: "Still no",        noMsg: "The butterflies are crying rn 🦋😭" },
+  { title: "But I made you a playlist…", tagline: "It has 47 songs. 47!!!",                        icon: "😩", noText: "I don't care",    noMsg: "47 songs… wasted. 47. 🎵💔" },
+  { title: "I'll share my fries.",        tagline: "And I NEVER share my fries.",                   icon: "🍟", noText: "Not for fries",   noMsg: "Not even for fries??? Who ARE you? 😭" },
+  { title: "Ok, I'm telling your mom.",  tagline: "She'll agree you're making a mistake.",          icon: "📞", noText: "Go ahead",         noMsg: "Calling her right now… 'Hello Mrs…'" },
+  { title: "خلاص. أنا مشيت.",            tagline: "…just kidding please don't go 🥲",              icon: "🚪", noText: "Bye then",         noMsg: "Ok fine. I accept your surrender. 🏳️" },
+];
+
+let noClicks = 0;
+
+const noBtn      = document.getElementById('noBtn');
+const yesBtn     = document.getElementById('yesBtn');
+const resultBox  = document.getElementById('resultBox');
+const moodIcon   = document.getElementById('moodIcon');
+const titleText  = document.getElementById('titleText');
+const tagline    = document.getElementById('tagline');
+const progressBar  = document.getElementById('progressBar');
+const progressFill = document.getElementById('progressFill');
+const starsRow   = document.getElementById('starsRow');
+
+/* ── Floating hearts ── */
+function spawnHearts() {
+  const container = document.getElementById('floatingHearts');
+  container.innerHTML = '';
+  const emojis = ['❤️','💕','💖','💗','💓','🌹'];
+  for (let i = 0; i < 14; i++) {
+    const el = document.createElement('span');
+    el.className = 'fh';
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left            = (Math.random() * 100) + '%';
+    el.style.fontSize        = (12 + Math.random() * 16) + 'px';
+    el.style.animationDuration = (4 + Math.random() * 5) + 's';
+    el.style.animationDelay  = (Math.random() * 5) + 's';
+    container.appendChild(el);
+  }
+}
+spawnHearts();
+
+/* ── No button ── */
+function handleNo() {
+  if (noClicks >= stages.length - 1) {
+    noBtn.textContent    = "خلاص سلمت 🏳️";
+    noBtn.disabled       = true;
+    noBtn.style.opacity  = '0.45';
+    noBtn.style.cursor   = 'not-allowed';
+    resultBox.textContent = "I accept your defeat. Now press Yes. 👆";
+    resultBox.style.color = '#888';
+    return;
+  }
+
+  noClicks++;
+  const s = stages[noClicks];
+
+  moodIcon.textContent  = s.icon;
+  titleText.textContent = s.title;
+  tagline.textContent   = s.tagline;
+  noBtn.textContent     = s.noText;
+
+  /* animate result */
+  resultBox.style.animation = 'none';
+  void resultBox.offsetHeight;
+  resultBox.style.animation = 'fadeSlide 0.4s ease';
+  resultBox.textContent      = stages[noClicks - 1].noMsg;
+  resultBox.style.color      = '#e91e63';
+
+  /* progress bar */
+  progressBar.style.display = 'block';
+  progressFill.style.width  = ((noClicks / (stages.length - 1)) * 100) + '%';
+
+  /* run away */
+  const maxShift = 60 + noClicks * 20;
+  const x = (Math.random() * 2 - 1) * maxShift;
+  const y = (Math.random() * 2 - 1) * (maxShift * 0.5);
+  noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  noBtn.style.fontSize  = Math.max(11, 15 - noClicks) + 'px';
+  noBtn.style.padding   = `${Math.max(6, 12 - noClicks)}px ${Math.max(10, 28 - noClicks * 3)}px`;
+}
+
+/* ── Yes button ── */
+function handleYes() {
+  moodIcon.textContent  = '🥰';
+  titleText.textContent = 'I KNEW IT!!';
+  tagline.textContent   = 'You took forever but okay, I forgive you 💅';
+
+  resultBox.style.animation = 'none';
+  void resultBox.offsetHeight;
+  resultBox.style.animation = 'fadeSlide 0.4s ease';
+  resultBox.textContent     = 'Now go tell all your friends you\'re taken 💕';
+  resultBox.style.color     = '#e91e63';
+
+  yesBtn.textContent    = 'Always & forever 💕';
+  yesBtn.style.transform = 'scale(1.08)';
+  noBtn.style.display   = 'none';
+
+  progressBar.style.display   = 'block';
+  progressFill.style.width    = '100%';
+  progressFill.style.background = '#1D9E75';
+
+  /* stars */
+  starsRow.style.display = 'flex';
+  starsRow.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('class','star');
+    const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z');
+    p.setAttribute('fill','#EF9F27');
+    svg.appendChild(p);
+    starsRow.appendChild(svg);
+    setTimeout(() => {
+      svg.style.transform  = 'scale(1.4)';
+      svg.style.transition = 'transform 0.2s';
+      setTimeout(() => svg.style.transform = '', 200);
+    }, i * 100);
+  }
+
+  spawnHearts();
+  spawnConfetti();
+}
+
+/* ── Confetti ── */
+function spawnConfetti() {
+  const card   = document.getElementById('card');
+  const colors = ['#e91e63','#EF9F27','#1D9E75','#378ADD','#7F77DD','#ff4081'];
+  for (let i = 0; i < 28; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className        = 'confetti-piece';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.left       = (15 + Math.random() * 70) + '%';
+      c.style.top        = '25%';
+      card.appendChild(c);
+      setTimeout(() => c.remove(), 1400);
+    }, i * 50);
+  }
+}
+</script>
+</body>
+</html>
